@@ -117,8 +117,8 @@ chic = [
 
 fonts = [
     wizard,
-    askew,
-    # chic,
+    #askew,
+    #chic,
     cyberpunk,
     blewd,
     toybox,
@@ -128,7 +128,6 @@ fonts = [
 
 def banner():
     seed = random.randint(0, (len(fonts) - 1))
-    print(f"{seed}")
     font = fonts[seed]
     for lines in font:
-        print(lines, end="\n")
+        print(lines)
