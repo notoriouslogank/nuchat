@@ -1,6 +1,7 @@
 import threading
 import socket
-from secrets import host, port, admin_pwd
+from obfusc8 import host, port, admin_pwd
+from banner import *
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host, port))
@@ -11,6 +12,7 @@ nicknames = []
 
 
 def broadcast(message):
+    """Send a message to all clients."""
     for client in clients:
         client.send(message)
 
@@ -78,7 +80,6 @@ def receive():
         print(f" IP: {str(address)} \n Name: {nickname}. \n")
         broadcast(f"{nickname} joined the chat. \n".encode("ascii"))
         client.send("Successfully connected to the server. \n".encode("ascii"))
-
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 
@@ -94,4 +95,5 @@ def kick_user(name):
 
 
 print(f"Server is listening on IP {host}:{port}...")
+print(banner())
 receive()

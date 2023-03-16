@@ -2,10 +2,12 @@ import threading
 import socket
 import random
 from datetime import datetime
-from secrets import host, port, guests
+from obfusc8 import host, port, guests
+from banner import *
 
 
 def welcome():
+    """Take nickname, check it against database."""
     global nickname
     global password
     print("Choose a nickname.")
@@ -23,8 +25,11 @@ def welcome():
     if nickname == "ADMIN":
         password = input("Enter password for user ADMIN: ")
 
+    print(banner())
+
 
 def prepare():
+    """Allow the client connection and keep it open."""
     global client
     global stop_thread
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -85,6 +90,7 @@ def write():
 
 
 def threads():
+    """Start threads."""
     receive_thread = threading.Thread(target=receive)
     receive_thread.start()
     write_thread = threading.Thread(target=write)

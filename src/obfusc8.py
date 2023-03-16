@@ -1,6 +1,6 @@
-admin_pwd = "mutatismutandis"
-host = "192.168.0.212"
-port = 65522
+admin_pwd = "mutatismutandis"  # TODO: Obfuscate this password
+host = "192.168.150.211"  # TODO: Make this variable
+port = 65522  # TODO: Is this best practices?
 guests = [
     "guest",
     "ghost",
