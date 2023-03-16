@@ -6,7 +6,7 @@ from config import host, port, guests, banner
 
 
 def welcome():
-    """Take nickname, check it against database."""
+    """Take nickname, check it against database, print to client."""
     global nickname
     global password
     print("Choose a nickname.")
@@ -14,6 +14,7 @@ def welcome():
     print("assigned to you. \n")
     nickname = input("Nickname: ")
 
+    '''Check the nickname for ADMIN or BAN; assign guest accout.'''
     if nickname == "":
         nickname = (
             f"{guests[random.randint(0,6)]}" + f"{str(random.randint(1000, 9999))}"
@@ -24,7 +25,7 @@ def welcome():
     if nickname == "ADMIN":
         password = input("Enter password for user ADMIN: ")
 
-    print(banner())
+    print(banner(cyberpunk))
 
 
 def prepare():

@@ -1,5 +1,6 @@
 import threading
 import socket
+import os
 from config import host, port, admin_pwd, banner
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +35,10 @@ def handle(client):
                         f.write(f"{name_to_ban}\n")
                     print(f"{name_to_ban} was banned.")
                 else:
-                    client.send("Command refused; must be ADMIN!".encode("ascii"))
+                    client.send("Command refused; must be ADMIN!".encode("ascii"))          
+            elif msg.decode("ascii").starswith("CLS"):
+                    system.os('clear')
+                    print(banner())
             else:
                 broadcast(message)
         except:
@@ -77,8 +81,9 @@ def receive():
         clients.append(client)
 
         print(f" IP: {str(address)} \n Name: {nickname}. \n")
-        broadcast(f"{nickname} joined the chat. \n".encode("ascii"))
         client.send("Successfully connected to the server. \n".encode("ascii"))
+        
+        broadcast(f"{nickname} joined the chat. \n".encode("ascii"))
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 
@@ -92,6 +97,9 @@ def kick_user(name):
         nicknames.remove(name)
         broadcast(f"{name} was kicked by ADMIN!".encode("ascii"))
 
+def cls():
+    os.system(clear)
+    print(banner())
 
 print(f"Server is listening on IP {host}:{port}...")
 print(banner())

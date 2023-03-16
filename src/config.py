@@ -127,7 +127,8 @@ fonts = [
 
 
 def banner():
-    seed = random.randint(0, (len(fonts) - 1))
-    font = fonts[seed]
+    font = fonts[1]
+    #seed = random.randint(0, (len(fonts) - 1))
+    #font = fonts[seed]
     for lines in font:
         print(lines)
