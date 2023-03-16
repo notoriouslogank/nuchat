@@ -2,8 +2,7 @@ import threading
 import socket
 import random
 from datetime import datetime
-from obfusc8 import host, port, guests
-from banner import *
+from config import host, port, guests, banner
 
 
 def welcome():

@@ -1,7 +1,6 @@
 import threading
 import socket
-from obfusc8 import host, port, admin_pwd
-from banner import *
+from config import host, port, admin_pwd, banner
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host, port))
