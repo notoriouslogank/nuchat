@@ -2,8 +2,8 @@ import threading
 import socket
 import random
 from datetime import datetime
-import src
-from src import client, server, config
+
+host = ('192.168.0.231', 65522)
 
 def welcome():
     """Take nickname, check it against database, print to client."""
@@ -31,7 +31,7 @@ def prepare():
     global client
     global stop_thread
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(config.getHost())
+    client.connect(host)
 
     stop_thread = False
 
@@ -55,12 +55,12 @@ def receive():
                     print("Connection refused: BANNED!")
                     client.close()
                     stop_thread = True
-            #elif message.startswith(nickname):
-                #print("\n")
-                #continue
-            else:
-                print(message)
-                print("")
+                elif message.startswith(nickname):
+                    print(f'{nickname}:{message}')
+                    continue
+                else:
+                    print(message)
+                    print("")
         except:
             print("An error occurred.  Whoopsie-daisy!")
             stop_thread = True
@@ -72,7 +72,7 @@ def write():
     while True:
         if stop_thread:
             break
-        message = (f'{nickname}: {input("")}' + "\n")
+        message = (f'{nickname}: {input("")} \n')
         if message[len(nickname) + 2 :].startswith("!"):
             if nickname == "ADMIN":
                 if message[len(nickname) + 2 :].startswith("!kick"):
@@ -82,7 +82,7 @@ def write():
             else:
                 print("This command can only be executed by ADMIN!")
         else:
-            client.send(f'{message}'.encode("ascii"))
+            client.send(message.encode("ascii"))
 
 write_thread = threading.Thread(target=write)
 receive_thread = threading.Thread(target=receive)
@@ -91,10 +91,6 @@ def threads():
     receive_thread.start()
     write_thread.start()
 
-
-def main():
-    welcome()
-    prepare()
-    threads()
-
-main()
+welcome()
+prepare()
+threads()

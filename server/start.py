@@ -1,17 +1,31 @@
 import threading
 import socket
 import os
-import src
 from datetime import datetime
-from src import config, client, server
-from src.config import *
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((config.getHost()))
-server.listen()
-
+host = ()
+port = ()
 clients = []
 nicknames = []
+banlist = 'server/banlist.txt'
+def getHost():
+    """
+    Get IP and Port of server.
+
+    """
+    global host
+    global port
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    host = s.getsockname()[0]
+    port = 65522  # TODO: Is this best practices?
+    hostname = host, port
+    s.close()
+    return hostname
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((getHost()))
+server.listen()
 
 def timestamp():
     time = datetime.now()
@@ -23,7 +37,6 @@ def broadcast(message):
     for client in clients:
         print(f'{timestamp()}')
         client.send(message)
-
 
 def handle(client):
     while True:
@@ -41,12 +54,12 @@ def handle(client):
                 if nicknames[clients.index(client)] == "ADMIN":
                     name_to_ban = msg.decode("ascii")[4:]
                     kick_user(name_to_ban)
-                    with open("src/server/bans.log", "a") as f:
+                    with open(f'{banlist}', "a") as f:
                         f.write(f"{name_to_ban}\n")
                     print(f"{name_to_ban} was banned.")
                 else:
                     client.send("Command refused; must be ADMIN!".encode("ascii"))          
-            elif msg.decode("ascii").starswith("CLS"):
+            elif msg.decode("ascii").startswith("CLS"):
                     system.os('clear')
                     print(banner())
             else:
@@ -65,12 +78,9 @@ def receive():
     while True:
         client, address = server.accept()
         print(f"Connection from: {str(address)}.")
-
-        client.send("NICK".encode("ascii"))
-
         nickname = client.recv(1024).decode("ascii")
 
-        with open("src/server/bans.log", "r") as f:
+        with open(f'{banlist}', "r") as f:
             bans = f.readlines()
 
         if nickname + "\n" in bans:
@@ -110,6 +120,21 @@ def cls():
     os.system(clear)
     print(welcome_banner())
 
-print(f"Server is listening on IP {config.host}:{config.port}...")
-#print(welcome_banner())
+print(f"Server is listening on IP {host}:{port}...")
 receive()
+#print(welcome_banner())
+
+""" banner1 = []
+banner2 = []
+banners = [banner1,
+           banner2
+           ]
+
+# TODO: STATIC/DYNAMIC BANNER FLAG
+def welcome_banner():
+    banner = banners[1]
+    #seed = random.randint(0, (len(fonts) - 1))
+    #font = fonts[seed]
+    for lines in banner:
+        print(lines)
+ """
