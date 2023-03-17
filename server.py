@@ -2,6 +2,7 @@ import threading
 import socket
 import os
 import src
+from datetime import datetime
 from src import config, client, server
 from src.config import *
 
@@ -12,10 +13,15 @@ server.listen()
 clients = []
 nicknames = []
 
+def timestamp():
+    time = datetime.now()
+    now = time.strftime("%H:%M:%S")
+    return str(now)
 
 def broadcast(message):
     """Send a message to all clients."""
     for client in clients:
+        print(f'{timestamp()}')
         client.send(message)
 
 
@@ -23,6 +29,8 @@ def handle(client):
     while True:
         try:
             msg = message = client.recv(1024)
+            print(timestamp())
+            print(msg.decode("ascii"))
             if msg.decode("ascii").startswith("KICK"):
                 if nicknames[clients.index(client)] == "ADMIN":
                     name_to_kick = msg.decode("ascii")[5:]
@@ -33,7 +41,7 @@ def handle(client):
                 if nicknames[clients.index(client)] == "ADMIN":
                     name_to_ban = msg.decode("ascii")[4:]
                     kick_user(name_to_ban)
-                    with open("bans.txt", "a") as f:
+                    with open("src/server/bans.log", "a") as f:
                         f.write(f"{name_to_ban}\n")
                     print(f"{name_to_ban} was banned.")
                 else:
@@ -62,7 +70,7 @@ def receive():
 
         nickname = client.recv(1024).decode("ascii")
 
-        with open("bans.txt", "r") as f:
+        with open("src/server/bans.log", "r") as f:
             bans = f.readlines()
 
         if nickname + "\n" in bans:
@@ -82,10 +90,9 @@ def receive():
         nicknames.append(nickname)
         clients.append(client)
 
-        print(f" IP: {str(address)} \n Name: {nickname}. \n")
         client.send("Successfully connected to the server. \n".encode("ascii"))
-        
         broadcast(f"{nickname} joined the chat. \n".encode("ascii"))
+
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 
@@ -101,8 +108,8 @@ def kick_user(name):
 
 def cls():
     os.system(clear)
-    print(banner())
+    print(welcome_banner())
 
 print(f"Server is listening on IP {config.host}:{config.port}...")
-print(banner())
+#print(welcome_banner())
 receive()

@@ -2,8 +2,8 @@ import threading
 import socket
 import random
 from datetime import datetime
-import config
-
+import src
+from src import client, server, config
 
 def welcome():
     """Take nickname, check it against database, print to client."""
@@ -25,15 +25,13 @@ def welcome():
     if nickname == "ADMIN":
         password = input("Enter password for user ADMIN: ")
 
-    print(banner(cyberpunk))
-
 
 def prepare():
     """Allow the client connection and keep it open."""
     global client
     global stop_thread
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((host, port))
+    client.connect(config.getHost())
 
     stop_thread = False
 
@@ -41,8 +39,6 @@ def prepare():
 def receive():
     while True:
         global stop_thread
-        now = datetime.now()
-        t = now.strftime("%H:%M:%S")
         if stop_thread:
             break
         try:
@@ -59,15 +55,15 @@ def receive():
                     print("Connection refused: BANNED!")
                     client.close()
                     stop_thread = True
-            elif message.startswith(nickname):
-                print("\n")
-                continue
+            #elif message.startswith(nickname):
+                #print("\n")
+                #continue
             else:
-                print(t)
                 print(message)
                 print("")
         except:
             print("An error occurred.  Whoopsie-daisy!")
+            stop_thread = True
             client.close()
             break
 
@@ -76,7 +72,7 @@ def write():
     while True:
         if stop_thread:
             break
-        message = f'{nickname}: {input("")}' + "\n"
+        message = (f'{nickname}: {input("")}' + "\n")
         if message[len(nickname) + 2 :].startswith("!"):
             if nickname == "ADMIN":
                 if message[len(nickname) + 2 :].startswith("!kick"):
@@ -86,14 +82,13 @@ def write():
             else:
                 print("This command can only be executed by ADMIN!")
         else:
-            client.send(message.encode("ascii"))
+            client.send(f'{message}'.encode("ascii"))
 
-
+write_thread = threading.Thread(target=write)
+receive_thread = threading.Thread(target=receive)
+    
 def threads():
-    """Start threads."""
-    receive_thread = threading.Thread(target=receive)
     receive_thread.start()
-    write_thread = threading.Thread(target=write)
     write_thread.start()
 
 
@@ -101,6 +96,5 @@ def main():
     welcome()
     prepare()
     threads()
-
 
 main()
