@@ -1,10 +1,12 @@
 import threading
 import socket
 import os
-from config import host, port, admin_pwd, banner
+import src
+from src import config, client, server
+from src.config import *
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host, port))
+server.bind((config.getHost()))
 server.listen()
 
 clients = []
@@ -101,6 +103,6 @@ def cls():
     os.system(clear)
     print(banner())
 
-print(f"Server is listening on IP {host}:{port}...")
+print(f"Server is listening on IP {config.host}:{config.port}...")
 print(banner())
 receive()

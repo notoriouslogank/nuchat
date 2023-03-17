@@ -2,7 +2,7 @@ import socket
 import random
 
 host = ()
-port = 65522  # TODO: Is this best practices?
+port = ()
 
 def getHost():
     """
@@ -10,12 +10,15 @@ def getHost():
 
     """
     global host
+    global port
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     host = s.getsockname()[0]
+    port = 65522  # TODO: Is this best practices?
+    hostname = host, port
     s.close()
+    return hostname
 
-getHost()
 
 # TODO: Toggle switch for ALLOW-GUESTS-WITHOUT-NICKNAME
 """ List of nicks for guest accounts """
@@ -50,7 +53,7 @@ banner2 = []
 banners = [banner1,
            banner2
            ]
-           
+
 # TODO: STATIC/DYNAMIC BANNER FLAG
 def welcome_banner():
     banner = banners[1]
@@ -58,3 +61,5 @@ def welcome_banner():
     #font = fonts[seed]
     for lines in banner:
         print(lines)
+
+print(getHost())

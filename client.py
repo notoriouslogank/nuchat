@@ -2,7 +2,7 @@ import threading
 import socket
 import random
 from datetime import datetime
-from config import host, port, guests, banner
+import config
 
 
 def welcome():
