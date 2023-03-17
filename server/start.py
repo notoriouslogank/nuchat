@@ -1,18 +1,19 @@
-import threading
-import socket
 import os
+import socket
+import threading
 from datetime import datetime
 
-host = ()
-port = ()
+host = ()  # Server IP
+port = ()  # Server Port
+banlist = "server/banlist.txt"  # Where to save the list of banned users <./server/banlist.txt>
+
 clients = []
 nicknames = []
-banlist = 'server/banlist.txt'
-def getHost():
-    """
-    Get IP and Port of server.
 
-    """
+
+def getHost():
+    """Automatically configure IP"""
+
     global host
     global port
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,27 +24,30 @@ def getHost():
     s.close()
     return hostname
 
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((getHost()))
 server.listen()
 
+
 def timestamp():
+    """Return an ascii encoded, formatted string with current datetime for user as timestamp."""
     time = datetime.now()
     now = time.strftime("%H:%M:%S")
     return str(now)
 
+
 def broadcast(message):
     """Send a message to all clients."""
     for client in clients:
-        print(f'{timestamp()}')
         client.send(message)
 
-def handle(client):
+
+def respond(client):
+    """Decode the client message"""
     while True:
         try:
             msg = message = client.recv(1024)
-            print(timestamp())
-            print(msg.decode("ascii"))
             if msg.decode("ascii").startswith("KICK"):
                 if nicknames[clients.index(client)] == "ADMIN":
                     name_to_kick = msg.decode("ascii")[5:]
@@ -54,16 +58,14 @@ def handle(client):
                 if nicknames[clients.index(client)] == "ADMIN":
                     name_to_ban = msg.decode("ascii")[4:]
                     kick_user(name_to_ban)
-                    with open(f'{banlist}', "a") as f:
+                    with open(f"{banlist}", "a") as f:
                         f.write(f"{name_to_ban}\n")
                     print(f"{name_to_ban} was banned.")
                 else:
-                    client.send("Command refused; must be ADMIN!".encode("ascii"))          
+                    client.send("Command refused; must be ADMIN!".encode("ascii"))
             elif msg.decode("ascii").startswith("CLS"):
-                    system.os('clear')
-                    print(banner())
-            else:
-                broadcast(message)
+                if nicknames[clients.index(client)] == "ADMIN":
+                    os.system("clear")
         except:
             index = clients.index(client)
             clients.remove(client)
@@ -74,13 +76,13 @@ def handle(client):
             break
 
 
-def receive():
+def usr_auth():
     while True:
         client, address = server.accept()
         print(f"Connection from: {str(address)}.")
         nickname = client.recv(1024).decode("ascii")
 
-        with open(f'{banlist}', "r") as f:
+        with open(f"{banlist}", "r") as f:
             bans = f.readlines()
 
         if nickname + "\n" in bans:
@@ -103,7 +105,7 @@ def receive():
         client.send("Successfully connected to the server. \n".encode("ascii"))
         broadcast(f"{nickname} joined the chat. \n".encode("ascii"))
 
-        thread = threading.Thread(target=handle, args=(client,))
+        thread = threading.Thread(target=respond, args=(client,))
         thread.start()
 
 
@@ -116,25 +118,7 @@ def kick_user(name):
         nicknames.remove(name)
         broadcast(f"{name} was kicked by ADMIN!".encode("ascii"))
 
-def cls():
-    os.system(clear)
-    print(welcome_banner())
 
-print(f"Server is listening on IP {host}:{port}...")
-receive()
-#print(welcome_banner())
+print(f"Server is listening on IP {host}:{port}...\n")
 
-""" banner1 = []
-banner2 = []
-banners = [banner1,
-           banner2
-           ]
-
-# TODO: STATIC/DYNAMIC BANNER FLAG
-def welcome_banner():
-    banner = banners[1]
-    #seed = random.randint(0, (len(fonts) - 1))
-    #font = fonts[seed]
-    for lines in banner:
-        print(lines)
- """
+usr_auth()
