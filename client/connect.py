@@ -1,49 +1,43 @@
-import threading
 import socket
-import random
-from datetime import datetime
-import src
-from src import client, server, config
+import threading
 
-def welcome():
+host = ("192.168.0.238", 65522)
+stop_thread = False
+
+
+def usr_acct():
     """Take nickname, check it against database, print to client."""
     global nickname
     global password
+
     print("Choose a nickname.")
     print("If blank, a nickname will be randomly")
     print("assigned to you. \n")
     nickname = input("Nickname: ")
 
-    '''Check the nickname for ADMIN or BAN; assign guest accout.'''
-    if nickname == "":
-        nickname = (
-            f"{guests[random.randint(0,6)]}" + f"{str(random.randint(1000, 9999))}"
-        )
-        print("Your randomly generated nickname for this session is: ")
-        print(f"{nickname}")
-
     if nickname == "ADMIN":
         password = input("Enter password for user ADMIN: ")
 
 
-def prepare():
+def usr_online():
     """Allow the client connection and keep it open."""
     global client
     global stop_thread
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(config.getHost())
+    client.connect(host)
 
     stop_thread = False
 
 
-def receive():
+def response():
     while True:
         global stop_thread
+        global client
         if stop_thread:
             break
         try:
             message = client.recv(1024).decode("ascii")
-            if message == "NICK":
+            if message == "KICK":
                 client.send(nickname.encode("ascii"))
                 next_message = client.recv(1024).decode("ascii")
                 if next_message == "PASS":
@@ -55,11 +49,8 @@ def receive():
                     print("Connection refused: BANNED!")
                     client.close()
                     stop_thread = True
-            #elif message.startswith(nickname):
-                #print("\n")
-                #continue
             else:
-                print(message)
+                print(f"{nickname} : {message}")
                 print("")
         except:
             print("An error occurred.  Whoopsie-daisy!")
@@ -68,11 +59,12 @@ def receive():
             break
 
 
-def write():
+def command():
+    global nickname
     while True:
         if stop_thread:
             break
-        message = (f'{nickname}: {input("")}' + "\n")
+        message = f'{nickname}: {input(" ")} \n'
         if message[len(nickname) + 2 :].startswith("!"):
             if nickname == "ADMIN":
                 if message[len(nickname) + 2 :].startswith("!kick"):
@@ -82,19 +74,17 @@ def write():
             else:
                 print("This command can only be executed by ADMIN!")
         else:
-            client.send(f'{message}'.encode("ascii"))
-
-write_thread = threading.Thread(target=write)
-receive_thread = threading.Thread(target=receive)
-    
-def threads():
-    receive_thread.start()
-    write_thread.start()
+            client.send(message.encode("ascii"))
+            print("/n")
 
 
 def main():
-    welcome()
-    prepare()
-    threads()
+    usr_acct()
+    usr_online()
+    response_thread = threading.Thread(target=response)
+    response_thread.start()
+    write_thread = threading.Thread(target=command)
+    write_thread.start()
+
 
 main()
