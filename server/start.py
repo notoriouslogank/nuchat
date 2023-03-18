@@ -76,7 +76,7 @@ def respond(client):
             break
 
 
-def usr_auth():
+def auth_connection():
     while True:
         client, address = server.accept()
         print(f"Connection from: {str(address)}.")
@@ -119,6 +119,6 @@ def kick_user(name):
         broadcast(f"{name} was kicked by ADMIN!".encode("ascii"))
 
 
-print(f"Server is listening on IP {host}:{port}...\n")
+print(f"Server is auth_connection on IP {host}:{port}...\n")
 
-usr_auth()
+auth_connection()
