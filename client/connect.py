@@ -60,13 +60,23 @@ def response():
 
 
 def command():
+    """ Commands
+    
+    # TODO: This could probably be made into a class relatively easily, eh?  Possibly move it into its own 'commands' module.
+    """
     global nickname
+    global stop_thread
     while True:
         if stop_thread:
             break
         message = f'{nickname}: {input(" ")} \n'
         if message[len(nickname) + 2 :].startswith("!"):
-            if nickname == "ADMIN":
+            if message[len(nickname) + 2 :].startswith('!quit'):
+                print("Goodbye!")
+                client.close()
+                stop_thread = True
+                break
+            elif nickname == "ADMIN":
                 if message[len(nickname) + 2 :].startswith("!kick"):
                     client.send(f"KICK {message[len(nickname)+2+6:]}".encode("ascii"))
                 elif message[len(nickname) + 2 :].startswith("!ban"):
@@ -75,7 +85,7 @@ def command():
                 print("This command can only be executed by ADMIN!")
         else:
             client.send(message.encode("ascii"))
-            print("/n")
+            print('\n')
 
 
 def main():

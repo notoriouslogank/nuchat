@@ -85,7 +85,7 @@ def auth_connection():
         with open(f"{banlist}", "r") as f:
             bans = f.readlines()
 
-        if nickname + "\n" in bans:
+        if (f'{nickname} + /n') in bans:
             client.send("BAN".encode("ascii"))
             client.close()
             continue
@@ -94,7 +94,7 @@ def auth_connection():
             client.send("PASS".encode("ascii"))
             password = client.recv(1024).decode("ascii")
 
-            if password != admin_pwd:
+            if password != 'mutatismutandis':
                 client.send("REFUSE".encode("ascii"))
                 client.close()
                 continue
